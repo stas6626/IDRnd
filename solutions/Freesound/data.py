@@ -67,7 +67,7 @@ class Dataset_Train(Dataset):
         self.labels = labels
         self.transforms = transforms
         self.preload = preload
-        self.sr = 44100
+        self.sr = 16000
         
     def __len__(self):
         return len(self.train_csv)
@@ -87,7 +87,7 @@ class Dataset_Train(Dataset):
             return self[idx+1]
             
         label = self.labels[idx]
-        label = torch.from_numpy(label).float()
+        label = torch.Tensor([label]).float()
         
         return audio, label
     

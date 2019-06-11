@@ -1,0 +1,6 @@
+DEBUG:root:actuall idx is:534 and error is Audio buffer is not finite everywhere
+INFO:root:avg_loss on 0 is 0.686982098599555
+INFO:root:Epoch 1 - avg_train_loss: 0.6870  avg_val_loss: 0.6804  val_lwlrap: 0.234542
+DEBUG:root:actuall idx is:534 and error is Audio buffer is not finite everywhere
+INFO:root:avg_loss on 1 is 0.6759126421431421
+INFO:root:Epoch 2 - avg_train_loss: 0.6759  avg_val_loss: 0.6691  val_lwlrap: 0.273462
