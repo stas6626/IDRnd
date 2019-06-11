@@ -1,0 +1,2 @@
+docker run --runtime=nvidia --shm-size 30G -v /media/stas/ssd/Notebooks/la_model/la_model/talkotron:/notebooks/tts -it hui_tf bash
+python3 train.py -c out_dir_6_5/checkpoint_14000 -o out_20_5 -l logger --warm_start
