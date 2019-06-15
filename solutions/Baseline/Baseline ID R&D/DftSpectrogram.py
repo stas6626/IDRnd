@@ -197,7 +197,7 @@ class DftSpectrogram(Layer):
                         K.std(fft, axis=1, keepdims=True) + K.epsilon())
 
         # fft = fft[:, self.bottom:-1 * self.top, :, :]
-        if K.image_dim_ordering() is 'th':
+        if K.common.image_dim_ordering() is 'th':
             fft = K.permute_dimensions(fft, (0, 3, 1, 2))
 
         return fft
@@ -211,7 +211,7 @@ class DftSpectrogram(Layer):
         else:
             times = ((input_shape[1] - self.length) + self.shift) // self.shift
 
-        if K.image_dim_ordering() is 'th':
+        if K.common.image_dim_ordering() is 'th':
             output_shape = [input_shape[0], input_shape[0], self.nfft // 2, times]
         else:
             output_shape = [input_shape[0], self.nfft // 2, times, input_shape[-1]]

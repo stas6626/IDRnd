@@ -3,19 +3,23 @@ import torch
 import os
 import gc
 import random
-import librosa
-import pickle
 import pandas as pd
-from torch.utils.tensorboard import SummaryWriter
+try:
+    from torch.utils.tensorboard import SummaryWriter
+except ImportError:
+    print("No tensorboard")
+
+
 from scipy.optimize import brentq
 from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
+
 
 class Train:
     def __init__(self, model_path='weight_best.pt',  gradient_acumulation=[]):
         self.model_path = model_path
         self.gradient_acumulation = gradient_acumulation
-    
+
     def fit(self, train_loader, val_loader, model, criterion, optimizer, scheduler, epoches=100):
         writer = SummaryWriter()
         best_epoch = -1
@@ -24,18 +28,17 @@ class Train:
         tr_cnt, val_cnt = 0, 0  ## TODO
         for epoch in range(epoches):
             model.train()
-            avg_loss = 0.
             if epoch in self.gradient_acumulation:
                 acumulate_factor *= 2
-                
+
             for x_batch, y_batch in train_loader:
                 preds = model(x_batch.float().cuda())
                 loss = criterion(preds, y_batch.cuda())
                 loss.backward()
                 if torch.isnan(loss): print(loss.item())
                 if tr_cnt % acumulate_factor == 0:
-                    optimizer.step()            
-                    if scheduler is not None: scheduler.step();  writer.add_scalar("lr", scheduler.get_lr()[0], tr_cnt) 
+                    optimizer.step()
+                    if scheduler is not None: scheduler.step();  writer.add_scalar("lr", scheduler.get_lr()[0], tr_cnt)
                     optimizer.zero_grad()
 
                 tr_cnt += 1
@@ -79,10 +82,8 @@ class Train:
             all_fnames.extend(fnames)
 
         test_preds = pd.DataFrame(data=np.concatenate(all_outputs),
-                                  index=all_fnames,
-                                  columns=map(str, range(80)))
-        test_preds = test_preds.groupby(level=0).mean()
-
+                                  index=all_fnames)
+        #test_preds = test_preds.groupby(level=0).mean()
         return test_preds
 
 def seed_everything(seed):

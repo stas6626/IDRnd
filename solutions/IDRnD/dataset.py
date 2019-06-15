@@ -1,15 +1,10 @@
-import random
 import os
-from .augmentations import PadOrClip
-from PIL import Image
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import librosa
-import logging
 import torch
 import numpy as np
-import pandas as pd
-from pathlib import Path
 import glob
+
 
 class Base_Dataset(Dataset):
     def __init__(self, X, y, transforms=None):
@@ -20,19 +15,19 @@ class Base_Dataset(Dataset):
         self.sr = 16000
 
     def __len__(self):
-        return len(self.y)
+        return len(self.X)
 
     def __getitem__(self, idx):
         audio = self.get_audio(idx)
         if self.transforms:
             audio = self.transforms(audio)
 
-        label = self.get_label(idx)        
-        
+        label = self.get_label(idx)
+
         return audio, label
 
     def get_audio(self, idx):
-        audio, _ = librosa.core.load(self.X.iloc[idx], sr=self.sr)
+        audio, _ = librosa.core.load(self.X[idx], sr=self.sr)
         return audio
 
     def get_label(self, idx):
@@ -41,13 +36,21 @@ class Base_Dataset(Dataset):
         return label
 
 
+class Test_Dataset(Base_Dataset):
+    def __init__(self, X, transforms=None):
+        super().__init__(X, None, transforms=transforms)
+
+    def get_label(self, idx):
+        return self.X[idx]
+
+
 class MelDataset(Base_Dataset):
     def __init__(self, X, y, folder, transforms=None):
         super().__init__(X, y, transforms=transforms)
         self.folder = folder
-        self.pathes =  [dict() for _ in range(50000)]
+        self.pathes = [dict() for _ in range(len(X))]
         self.load()
-    
+
     def load(self):
         data = os.listdir(self.folder)
         for name in data:
@@ -65,10 +68,11 @@ class MelDataset(Base_Dataset):
         mel = np.load(path, allow_pickle=True)
         return mel
 
+
 def get_train_data():
     dataset_dir = "/src/workspace/data/files/"
     train_dataset_dir = os.path.join(dataset_dir, "Training_Data/")
-    
+
     X = sorted(glob.glob(os.path.join(train_dataset_dir, '**/*.wav'), recursive=True))
     y = np.array([1 if "human" in i else 0 for i in X])
     X = np.array(X)
