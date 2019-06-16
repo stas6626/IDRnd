@@ -325,32 +325,25 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
             valid_loader,
             verbose=True, write_summary=True, epoch=epoch)
 
-    def predict(self, loader, n_tta=1):
+    def predict(self, loader):
 
         self.eval()
 
         all_class_probs = []
 
-        for k in range(n_tta):
+        with torch.no_grad():
+            for sample in loader:
 
-            tta_probs = []
+                signal = sample["signal"].to(self.device)
 
-            with torch.no_grad():
-                for sample in loader:
+                outputs = self(signal)
 
-                    signal = sample["signal"].to(self.device)
+                class_logits = outputs["class_logits"].squeeze(-1)
 
-                    outputs = self(signal)
+                probs = torch.sigmoid(class_logits).data.cpu().numpy()
+                all_class_probs.extend(probs)
 
-                    class_logits = outputs["class_logits"]
-
-                    class_probs = torch.sigmoid(class_logits).data.cpu().numpy()
-                    tta_probs.extend(class_probs)
-
-            tta_probs = np.array(tta_probs)
-            all_class_probs.append(tta_probs)
-
-        all_class_probs = np.mean(all_class_probs, 0)
+        all_class_probs = np.asarray(all_class_probs)
 
         return all_class_probs
 
