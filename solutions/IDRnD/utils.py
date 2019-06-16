@@ -30,7 +30,7 @@ class Train:
             model.train()
             if epoch in self.gradient_acumulation:
                 acumulate_factor *= 2
-
+            avg_train_loss = 0.
             for x_batch, y_batch in train_loader:
                 preds = model(x_batch.float().cuda())
                 loss = criterion(preds, y_batch.cuda())
@@ -38,12 +38,13 @@ class Train:
                 if torch.isnan(loss): print(loss.item())
                 if tr_cnt % acumulate_factor == 0:
                     optimizer.step()
-                    if scheduler is not None: scheduler.step();  writer.add_scalar("lr", scheduler.get_lr()[0], tr_cnt)
+                    #if scheduler is not None: scheduler.step();  writer.add_scalar("lr", scheduler.get_lr()[0], tr_cnt)
                     optimizer.zero_grad()
 
                 tr_cnt += 1
                 writer.add_scalar("train_loss", loss.item(), tr_cnt)
-            if scheduler is not None: scheduler.step();  writer.add_scalar("lr", scheduler.get_lr()[0], tr_cnt)
+                avg_train_loss+=loss.item()
+            if scheduler is not None: scheduler.step(avg_train_loss); tr_cnt
 
             if val_loader is None: continue
             gc.collect()
@@ -77,7 +78,7 @@ class Train:
         model.eval()
 
         for images, fnames in test_loader:
-            preds = torch.sigmoid(model(images.float().cuda()).detach())
+            preds = model(images.float().cuda()).detach()
             all_outputs.append(preds.cpu().numpy())
             all_fnames.extend(fnames)
 

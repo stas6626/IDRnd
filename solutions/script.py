@@ -7,9 +7,9 @@
 import os
 
 from IDRnD.utils import Train, seed_everything
-from IDRnD.augmentations import ToMellSpec, PadOrClip, ToTensor
+from IDRnD.augmentations import ToMellSpec, PadOrClip, ToTensor, Normalize_predef
 from IDRnD.dataset import Test_Dataset
-from IDRnD.resnet import resnet34
+from IDRnD.resnet import resnet18
 
 import pandas as pd
 import numpy as np
@@ -38,6 +38,7 @@ eval_protocol['score'] = 0.0
 
 post_transform = transforms.Compose([
     ToMellSpec(n_mels=128),
+    Normalize_predef(-29.6179, 16.6342),
     librosa.power_to_db,
     PadOrClip(150),
     ToTensor(),
@@ -60,13 +61,13 @@ test_dataset = Test_Dataset(np.array(eval_protocol["path"]), post_transform)
 
 test_loader = DataLoader(test_dataset, batch_size=50, shuffle=False)
 
-model = resnet34(num_classes=1).cuda()
+model = resnet18(num_classes=1).cuda()
 
 #model.load_state_dict(torch.load('models/simple_old_conv.pt'))
 #model_dst = torch.nn.DataParallel(model, device_ids=[0, 1]).cuda()
-#torch.save(model_dst.module.state_dict(),  'models/kaggle2_nonparallel.pt')
+#torch.save(model_dst.module.state_dict(),  'models/kaggle2_nonparallel.pt') 
 model.eval()
-model.load_state_dict(torch.load('models/kaggle2_nonparallel.pt'))
+model.load_state_dict(torch.load('models/resnet_18_last_epoch.pt'))
 pred = hm.predict_on_test(test_loader, model)
 
 

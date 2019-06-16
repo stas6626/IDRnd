@@ -13,7 +13,4 @@ TEST=tests/
 SRC?="/media/stas/ssd/Notebooks/IDRND/test_pol"
 
 test:
-	nvidia-docker run --memory 20g -v $(SRC):/workspace/ -w /workspace/ -it boosters_gpu_python bash
-
-
-
+	nvidia-docker run --memory 20g -v $(SRC):/workspace/ -w /workspace/ -it boosters_gpu_python python3 script.py
