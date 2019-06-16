@@ -2,6 +2,9 @@ data/
 solutions/Freesound/pickles
 solutions/models
 
+.vscode
+__pycache__
+dimka/env/
 dimka/data/
 dimka/experiments/
 dimka/notebooks/
