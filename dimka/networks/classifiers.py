@@ -14,7 +14,7 @@ from tensorboardX import SummaryWriter
 from ops.training import OPTIMIZERS, make_scheduler, make_step
 from networks.losses import binary_cross_entropy, focal_loss
 from ops.utils import (
-    make_mel_filterbanks, is_mel, is_stft, compute_torch_stft, compute_eer)
+    make_mel_filterbanks, is_mel, is_stft, compute_torch_stft, compute_inverse_eer)
 
 
 class ResnetBlock2d(nn.Module):
@@ -253,7 +253,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 probs = torch.sigmoid(class_logits).data.cpu().numpy()
                 labels = labels.data.cpu().numpy()
 
-                metric = compute_eer(labels, probs)
+                metric = compute_inverse_eer(labels, probs)
                 history.append(metric)
 
                 pb.update()
@@ -313,7 +313,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
             all_class_probs = np.asarray(all_class_probs)
             all_labels = np.asarray(all_labels)
 
-            metric = compute_eer(all_labels, all_class_probs)
+            metric = compute_inverse_eer(all_labels, all_class_probs)
 
             if write_summary:
                 self.add_scalar_summaries(

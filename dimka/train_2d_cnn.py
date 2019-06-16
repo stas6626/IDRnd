@@ -19,7 +19,7 @@ from ops.transforms import (
     AudioFeatures, MapLabels, RenameFields,
     MixUp, SampleSegment, SampleLongAudio,
     AudioAugmentation, ShuffleAudio, CutOut, Identity)
-from ops.utils import load_json, compute_eer
+from ops.utils import load_json, compute_inverse_eer
 from ops.padding import make_collate_fn
 
 torch.manual_seed(42)
@@ -339,7 +339,7 @@ with Experiment({
         val_predictions_df.sort_values(by="fname", inplace=True)
         val_labels_df.sort_values(by="fname", inplace=True)
 
-        metric = compute_eer(
+        metric = compute_inverse_eer(
             val_labels_df.drop("fname", axis=1).values,
             val_predictions_df.drop("fname", axis=1).values
         )

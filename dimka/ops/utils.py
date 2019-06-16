@@ -11,12 +11,12 @@ from matplotlib import pyplot as plt
 import librosa
 
 
-def compute_eer(y_true, scores):
+def compute_inverse_eer(y_true, scores):
 
     fpr, tpr, thresholds = roc_curve(y_true, scores, pos_label=1)
     fnr = 1 - tpr
     eer = fpr[np.nanargmin(np.absolute((fnr - fpr)))]
-    return eer
+    return 1 - eer
 
 
 def load_json(file):
