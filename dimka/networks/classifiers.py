@@ -186,11 +186,6 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
         writer.add_scalar("loss", loss, global_step)
         writer.add_scalar("metric", metric, global_step)
 
-    def add_histogram_summaries(
-        self, losses, writer, global_step):
-
-        writer.add_histogram("losses", np.array(losses), global_step=global_step)
-
     def add_image_summaries(self, signal, global_step, writer, to_plot=8):
 
         if len(signal) > to_plot:
@@ -268,9 +263,6 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 if batch_idx == 0:
                     self.add_image_summaries(
                         signal, self.global_step, self.train_writer)
-
-        self.add_histogram_summaries(
-            training_losses, self.train_writer, self.global_step)
 
     def evaluate(self, loader, verbose=False, write_summary=False, epoch=None):
 
