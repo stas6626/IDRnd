@@ -3,6 +3,7 @@ import random
 import numpy as np
 import librosa
 import scipy.signal
+import soundfile
 
 from sklearn.utils import gen_even_slices
 
@@ -25,7 +26,7 @@ def trim_audio(audio):
 
 
 def read_audio(file):
-    audio, sr = librosa.load(file, sr=None)
+    audio, sr = soundfile.read(file, dtype=np.float32, samplerate=None)
     return audio, sr
 
 
