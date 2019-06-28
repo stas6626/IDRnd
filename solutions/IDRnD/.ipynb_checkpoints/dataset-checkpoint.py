@@ -54,7 +54,8 @@ class MelDataset(Base_Dataset):
     def load(self):
         data = os.listdir(self.folder)
         for name in data:
-            if name == ".ipynb_checkpoints": continue
+            if name == ".ipynb_checkpoints":
+                continue
             idx = int(name.split("_")[1].split(".")[0])
             if name not in self.pathes[idx]:
                 self.pathes[idx][name] = 0
@@ -72,12 +73,12 @@ class MelDataset(Base_Dataset):
 def get_train_data(drop_dublicates=True):
     dataset_dir = "/src/workspace/data/files/"
     train_dataset_dir = os.path.join(dataset_dir, "Training_Data/")
-    
-    X = sorted(glob.glob(os.path.join(train_dataset_dir, '**/*.wav'), recursive=True))
+
+    X = sorted(glob.glob(os.path.join(train_dataset_dir, "**/*.wav"), recursive=True))
     y = np.array([1 if "human" in i else 0 for i in X])
     X = np.array(X)
-    
+
     if drop_dublicates:
         white_list = np.load("IDRnD/white_list.npy")
-        X, y = X[white_list], y[white_list] 
+        X, y = X[white_list], y[white_list]
     return X, y

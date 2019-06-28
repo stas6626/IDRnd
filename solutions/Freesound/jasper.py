@@ -4,8 +4,7 @@ import torch.nn.functional as F
 
 
 class TinyJasper(nn.Module):
-
-    def __init__(self, in_channels = 64):
+    def __init__(self, in_channels=64):
         super(TinyJasper, self).__init__()
 
         self.first_layer = C(256, 256, 11, stride=2, dropout_rate=0.2)
@@ -46,9 +45,9 @@ class TinyJasper(nn.Module):
             C(768, 896, 29, dropout_rate=0.4, dilation=2),
             C(896, 1024, 1, dropout_rate=0.4),
             C(1024, 80, 1, dropout_rate=0.4),
-            C(80, 4, 1, dropout_rate=0.4)
+            C(80, 4, 1, dropout_rate=0.4),
         )
-        
+
         self.fc = nn.Sequential(
             nn.Dropout(0.2),
             nn.BatchNorm1d(1024),
@@ -68,14 +67,23 @@ class TinyJasper(nn.Module):
         y = self.B5(self.B4(y)) + self.r4_5(y)
 
         y = self.last_layer(y)
-         
+
         y = y.view(-1, 1024)
         y = self.fc(y)
         return y
 
 
 class C(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, dilation=1, activation='relu', dropout_rate=0.0):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        stride=1,
+        dilation=1,
+        activation="relu",
+        dropout_rate=0.0,
+    ):
         """1D Convolution with the batch normalization and RELU."""
         super(C, self).__init__()
         self.activation = activation
@@ -88,8 +96,15 @@ class C(nn.Module):
         else:
             padding = (kernel_size - stride + 1) // 2
 
-        self.conv = nn.Conv1d(in_channels, out_channels, kernel_size, stride=1, padding=padding, dilation=dilation)
-        nn.init.xavier_uniform_(self.conv.weight, nn.init.calculate_gain('relu'))
+        self.conv = nn.Conv1d(
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=1,
+            padding=padding,
+            dilation=dilation,
+        )
+        nn.init.xavier_uniform_(self.conv.weight, nn.init.calculate_gain("relu"))
 
         self.bn = nn.BatchNorm1d(out_channels)
 
@@ -97,7 +112,7 @@ class C(nn.Module):
         y = self.conv(x)
         y = self.bn(y)
 
-        if self.activation == 'relu':
+        if self.activation == "relu":
             y = F.relu(y, inplace=True)
             # OpenSeq2Seq uses max clamping instead of gradient clipping
             # y = torch.clamp(y, min=0.0, max=20.0)  # like RELU but clamp at 20.0
