@@ -10,7 +10,7 @@ PYTHON_VERSION?=3.6
 CUDA_VERSION?=9.0
 CUDNN_VERSION?=7
 TEST=tests/
-SRC?="/media/stas/ssd/Notebooks/Freesound"
+SRC?="/media/stas/ssd/Notebooks/IDRND"
 
 build:
 	docker build -t keras --build-arg python_version=$(PYTHON_VERSION) --build-arg cuda_version=$(CUDA_VERSION) --build-arg cudnn_version=$(CUDNN_VERSION) -f $(DOCKER_FILE) .
@@ -22,7 +22,7 @@ ipython: build
 	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env KERAS_BACKEND=$(BACKEND) keras ipython
 
 notebook: build
-	$(DOCKER) run -it --shm-size 50G -v $(SRC):/src/workspace -v $(DATA):/data --net=host --env KERAS_BACKEND=$(BACKEND) keras
+	$(DOCKER) run -it --shm-size 50G -v $(SRC):/src/workspace -v $(DATA):/data --net=host --env KERAS_BACKEND=$(BACKEND) keras sh begin.sh
 
 test: build
 	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env KERAS_BACKEND=$(BACKEND) keras py.test $(TEST)
