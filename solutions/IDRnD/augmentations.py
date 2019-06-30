@@ -134,15 +134,23 @@ class ToMellSpec:
 
 
 class PadOrClip:
-    def __init__(self, pad_lenth):
+    def __init__(self, pad_lenth, save_mean_and_var=True):
         self.pad_lenth = pad_lenth
+        self.save_mean_and_var = save_mean_and_var
 
     def __call__(self, mel):
         if len(mel.shape) == 2:
             if mel.shape[1] < self.pad_lenth:
+                if self.save_mean_and_var:
+                    mean, std = np.mean(mel), np.std(mel)
+                
+                init_shape = mel.shape[1]
                 mel = np.pad(
-                    mel, [(0, 0), (0, self.pad_lenth - mel.shape[1])], "constant"
+                    mel, [(0, 0), (0, self.pad_lenth - init_shape)], "constant"
                 )
+                if self.save_mean_and_var:
+                    normal = np.random.normal(mean, std, size=(mel.shape[0], self.pad_lenth - init_shape))
+                    mel[:, init_shape:] = normal
             else:
                 right_limit = mel.shape[1] - self.pad_lenth
                 shift = random.randint(0, right_limit)

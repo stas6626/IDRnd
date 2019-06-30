@@ -6,7 +6,7 @@ import numpy as np
 import glob
 
 
-class Base_Dataset(Dataset):
+class BaseDataset(Dataset):
     def __init__(self, X, y, transforms=None):
         super().__init__()
         self.X = X
@@ -36,7 +36,7 @@ class Base_Dataset(Dataset):
         return label
 
 
-class Test_Dataset(Base_Dataset):
+class Test_Dataset(BaseDataset):
     def __init__(self, X, transforms=None):
         super().__init__(X, None, transforms=transforms)
 
@@ -44,7 +44,7 @@ class Test_Dataset(Base_Dataset):
         return self.X[idx]
 
 
-class MelDataset(Base_Dataset):
+class MelDataset(BaseDataset):
     def __init__(self, X, y, folder, transforms=None):
         super().__init__(X, y, transforms=transforms)
         self.folder = folder
@@ -70,7 +70,7 @@ class MelDataset(Base_Dataset):
         return mel
 
 
-class SimpleMelDataset(Base_Dataset):
+class SimpleMelDataset(BaseDataset):
     def __init__(self, X, y, folder, transforms=None):
         super().__init__(X, y, transforms=transforms)
         self.folder = folder
@@ -92,4 +92,5 @@ def get_train_data(drop_dublicates=True):
     if drop_dublicates:
         white_list = np.load("IDRnD/data/white_list.npy")
         X, y = X[white_list], y[white_list]
+    X = np.array([x.split("/")[-1].split(".")[0] + ".npy" for x in X])
     return X, y

@@ -1,2 +1,12 @@
 DEBUG:matplotlib.pyplot:Loaded backend module://ipykernel.pylab.backend_inline version unknown.
 DEBUG:parso.cache:pickle loaded: /opt/conda/lib/python3.6/site-packages/numpy/__init__.py
+DEBUG:parso.python.diff:diff parser start
+DEBUG:parso.python.diff:line_lengths old: 1; new: 1
+DEBUG:parso.python.diff:-> code[replace] old[1:1] new[1:1]
+DEBUG:parso.python.diff:parse_part from 1 to 1 (to 0 in part parser)
+DEBUG:parso.python.diff:diff parser end
+DEBUG:parso.python.diff:diff parser start
+DEBUG:parso.python.diff:line_lengths old: 1; new: 1
+DEBUG:parso.python.diff:-> code[replace] old[1:1] new[1:1]
+DEBUG:parso.python.diff:parse_part from 1 to 1 (to 0 in part parser)
+DEBUG:parso.python.diff:diff parser end
