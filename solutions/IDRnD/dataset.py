@@ -70,6 +70,17 @@ class MelDataset(Base_Dataset):
         return mel
 
 
+class SimpleMelDataset(Base_Dataset):
+    def __init__(self, X, y, folder, transforms=None):
+        super().__init__(X, y, transforms=transforms)
+        self.folder = folder
+    
+    def get_audio(self, idx):
+        path = os.path.join(self.folder, self.X[idx])
+        mel = np.load(path)
+        return mel
+
+
 def get_train_data(drop_dublicates=True):
     dataset_dir = "/src/workspace/data/files/"
     train_dataset_dir = os.path.join(dataset_dir, "Training_Data/")
@@ -79,6 +90,6 @@ def get_train_data(drop_dublicates=True):
     X = np.array(X)
 
     if drop_dublicates:
-        white_list = np.load("IDRnD/white_list.npy")
+        white_list = np.load("IDRnD/data/white_list.npy")
         X, y = X[white_list], y[white_list]
     return X, y

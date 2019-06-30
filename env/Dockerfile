@@ -95,3 +95,4 @@ RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -
 RUN jupyter labextension install @jupyterlab/git
 RUN pip install --upgrade jupyterlab-git
 RUN jupyter serverextension enable --py jupyterlab_git
+RUN git config --global user.name "Prikhodko Stanislav" && git config --global user.email "doga05@bk.ru"
