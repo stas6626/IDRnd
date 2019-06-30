@@ -59,12 +59,12 @@ hm = Train()
 
 test_dataset = Test_Dataset(np.array(eval_protocol["path"]), post_transform)
 
-test_loader = DataLoader(test_dataset, batch_size=50, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=200, shuffle=False)
 
 model = resnet34(num_classes=1).cuda()
 
 model.eval()
-model.load_state_dict(torch.load("models/resnet_34_better_val.pt48"))
+model.load_state_dict(torch.load("models/resnet_34_better_val.pt"))
 pred = hm.predict_on_test(test_loader, model)
 
 

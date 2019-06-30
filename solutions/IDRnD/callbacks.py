@@ -72,9 +72,10 @@ class AccumulateGradient(Callback):
 
 
 class SaveBestEpoch(Callback):
-    def __init__(self, model_path):
+    def __init__(self, model_path, scorer):
         self.model_path = model_path
         self.best_score = 1
+        self.scorer = scorer
 
     def on_epoch_end(self, **data):
         if self.scorer is None:
