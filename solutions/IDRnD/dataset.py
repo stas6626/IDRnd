@@ -74,7 +74,7 @@ class SimpleMelDataset(BaseDataset):
     def __init__(self, X, y, folder, transforms=None):
         super().__init__(X, y, transforms=transforms)
         self.folder = folder
-    
+
     def get_audio(self, idx):
         path = os.path.join(self.folder, self.X[idx])
         mel = np.load(path)
