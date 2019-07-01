@@ -1,98 +1,77 @@
-import sys
-import subprocess
+#!/usr/bin/env python
+# coding: utf-8
 
-def install(package):
-    subprocess.call([sys.executable, "-m", "pip", "install", package])
-
-
-# install("mag")
+# In[1]:
 
 
 import os
-import gc
-import argparse
-import json
-import math
-from functools import partial
+
+from IDRnD.utils import seed_everything
+from IDRnD.augmentations import ToMellSpec, PadOrClip, ToTensor, Normalize_predef
+from IDRnD.dataset import Test_Dataset
+from IDRnD.resnet import resnet34
+from IDRnD.pipeline import *
+
 
 import pandas as pd
 import numpy as np
+import librosa
 import torch
-from mag.experiment import Experiment
-from mag.utils import green, bold
-import mag
+from torch.utils.data import DataLoader
+from torchvision.transforms import transforms
 
-from datasets.antispoof_dataset import AntispoofDataset
-from networks.classifiers import TwoDimensionalCNNClassificationModel
-from ops.transforms import (
-    Compose, DropFields, LoadAudio,
-    AudioFeatures, MapLabels, RenameFields,
-    MixUp, SampleSegment, SampleLongAudio,
-    AudioAugmentation, FlipAudio, ShuffleAudio)
-from ops.padding import make_collate_fn
+seed_everything(0)
 
 
-mag.use_custom_separator("-")
+# In[2]:
+
+
+dataset_dir = "."
 
 eval_protocol_path = "protocol_test.txt"
 eval_protocol = pd.read_csv(eval_protocol_path, sep=" ", header=None)
-eval_protocol.columns = ['path', 'key']
-eval_protocol['score'] = 0.0
+eval_protocol.columns = ["path", "key"]
+eval_protocol["score"] = 0.0
+# eval_protocol['path'] = eval_protocol['path'].apply(lambda x: os.path.join(dataset_dir, x))
 
-### stasian debug
-eval_protocol_path_values= eval_protocol["path"].values
-#print(eval_protocol_path_values)
-#eval_protocol_path_values[0] = eval_protocol_path_values[0][1]
-#print(eval_protocol_path_values)
-###
 
-num_workers = 0
-batch_size = 10
-device = "cuda"
+# In[2]:
 
-experiment = "experiments/mel_1024_512_64-10-0.0-0.0-2d_cnn-max-64-1.3-5-0.0-2-1-50-15-0.001-adam-1cycle_0.0001_0.005-50-0.0"
 
-folds = [0, 1]
+post_transform = transforms.Compose(
+    [
+        ToMellSpec(n_mels=128),
+        librosa.power_to_db,
+        PadOrClip(320),
+        Normalize_predef(-29.6179, 16.6342),
+        ToTensor(),
+    ]
+)
 
-predictions = []
 
-with Experiment(resume_from=experiment) as experiment:
+# ### predict
 
-    config = experiment.config
+# In[3]:
 
-    audio_transform = AudioFeatures(config.data.features)
 
-    for fold in folds:
+# In[4]:
 
-        print("\n\n   -----  Fold {}\n".format(fold))
 
-        test_loader = torch.utils.data.DataLoader(
-            AntispoofDataset(
-                audio_files=eval_protocol_path_values, #stasian_debug
-                labels=None,
-                transform=Compose([
-                    LoadAudio(),
-                    audio_transform,
-                    DropFields(("audio", "sr")),
-                ]),
-            ),
-            shuffle=False,
-            batch_size=batch_size,
-            collate_fn=make_collate_fn({"signal": audio_transform.padding_value}),
-            num_workers=num_workers
-        )
+hm = Train()
 
-        model = TwoDimensionalCNNClassificationModel(experiment, device=device)
-        model.load_best_model(fold)
+test_dataset = Test_Dataset(np.array(eval_protocol["path"]), post_transform)
 
-        fold_predictions = model.predict(test_loader)
-        predictions.append(fold_predictions)
+test_loader = DataLoader(test_dataset, batch_size=100, shuffle=False)
 
-predictions = np.mean(predictions, axis=0)
+model = resnet34(num_classes=1).cuda()
 
-print(predictions)
+model.eval()
+model.load_state_dict(torch.load("models/resnet_34_better_val.pt"))
+pred = hm.predict_on_test(test_loader, model)
 
-print(eval_protocol)
 
-eval_protocol["score"] = predictions
+# In[7]:
+
+
+eval_protocol["score"] = pred.values
 eval_protocol[["path", "score"]].to_csv("answers.csv", index=None)

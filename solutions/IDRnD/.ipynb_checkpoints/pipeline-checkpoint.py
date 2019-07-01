@@ -1,8 +1,5 @@
 import numpy as np
 import torch
-import os
-import gc
-import random
 import pandas as pd
 
 
@@ -24,7 +21,7 @@ class Train:
         for callback in self.callbacks:
             callback.on_train_begin()
 
-        tr_cnt, val_cnt = 0, 0 
+        tr_cnt, val_cnt = 0, 0
         for epoch in range(epoches):
             model.train()
 

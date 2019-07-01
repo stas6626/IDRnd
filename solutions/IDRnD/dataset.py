@@ -94,3 +94,14 @@ def get_train_data(drop_dublicates=True):
         X, y = X[white_list], y[white_list]
     X = np.array([x.split("/")[-1].split(".")[0] + ".npy" for x in X])
     return X, y
+
+def get_common_voices():
+    common = []
+    all_files = os.listdir("../data/files/raw_mels/")
+    for file in all_files:
+        if file.startswith("common"):
+            common.append(file)
+
+    common_X = np.array(common)
+    common_y = np.ones_like(common_X, dtype=np.int16)
+    return common_X, common_y

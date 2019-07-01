@@ -6,10 +6,12 @@
 
 import os
 
-from IDRnD.utils import Train, seed_everything
+from IDRnD.utils import seed_everything
 from IDRnD.augmentations import ToMellSpec, PadOrClip, ToTensor, Normalize_predef
 from IDRnD.dataset import Test_Dataset
 from IDRnD.resnet import resnet34
+from IDRnD.pipeline import *
+
 
 import pandas as pd
 import numpy as np
@@ -59,7 +61,7 @@ hm = Train()
 
 test_dataset = Test_Dataset(np.array(eval_protocol["path"]), post_transform)
 
-test_loader = DataLoader(test_dataset, batch_size=200, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=100, shuffle=False)
 
 model = resnet34(num_classes=1).cuda()
 
