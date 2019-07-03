@@ -22,7 +22,8 @@ ipython: build
 	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env KERAS_BACKEND=$(BACKEND) keras ipython
 
 notebook: build
-	$(DOCKER) run -it --shm-size 50G -v $(SRC):/src/workspace -v $(DATA):/data -v /media/stas/63c3d733-f9e7-40bc-948c-464e798faba7/stas/Notebooks/common_voices:/data_common_voices --net=host --env KERAS_BACKEND=$(BACKEND) keras sh begin.sh
+	$(DOCKER) run -it --shm-size 50G -v $(SRC):/src/workspace -v $(DATA):/data -v /media/stas/kek4/common_voices:/data_common_voices \
+    -v /media/stas/kek4/spoof:/data_spoof --net=host --env KERAS_BACKEND=$(BACKEND) keras sh begin.sh
 
 test: build
 	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env KERAS_BACKEND=$(BACKEND) keras py.test $(TEST)

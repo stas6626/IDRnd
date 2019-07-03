@@ -66,7 +66,7 @@ test_loader = DataLoader(test_dataset, batch_size=100, shuffle=False)
 model = resnet34(num_classes=1).cuda()
 
 model.eval()
-model.load_state_dict(torch.load("models/resnet_34_better_val.pt"))
+model.load_state_dict(torch.load("models/resnet_34_common_voice.pt"))
 pred = hm.predict_on_test(test_loader, model)
 
 
