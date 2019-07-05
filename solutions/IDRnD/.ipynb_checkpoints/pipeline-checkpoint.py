@@ -8,15 +8,7 @@ class Train:
         self.callbacks = callbacks
         self.acumulate_factor = 1
 
-    def fit(
-        self,
-        train_loader,
-        val_loader,
-        model,
-        criterion,
-        optimizer,
-        epoches=100,
-    ):
+    def fit(self, train_loader, val_loader, model, criterion, optimizer, epoches=100):
 
         for callback in self.callbacks:
             callback.on_train_begin()
@@ -30,9 +22,9 @@ class Train:
 
             for x_batch, y_batch in train_loader:
                 preds = model(x_batch.float().cuda())
+
                 loss = criterion(preds, y_batch.cuda())
                 loss.backward()
-
                 if tr_cnt % self.acumulate_factor == 0:
                     optimizer.step()
                     optimizer.zero_grad()
