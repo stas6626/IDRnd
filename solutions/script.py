@@ -67,11 +67,8 @@ model = resnet34(num_classes=1).cuda()
 
 model.eval()
 model.load_state_dict(torch.load("models/resnet_34_common_voice.pt"))
-pred = hm.predict_on_test(test_loader, model)
+pred = hm.predict_on_test(test_loader, model).values
 
 
-# In[7]:
-
-
-eval_protocol["score"] = pred.values
+eval_protocol["score"] = pred
 eval_protocol[["path", "score"]].to_csv("answers.csv", index=None)

@@ -81,6 +81,14 @@ class SaveEveryEpoch(Callback):
         torch.save(data["model"].state_dict(), self.model_path + str(data["epoch"]))
 
 
+class SaveLastEpoch(Callback):
+    def __init__(self, model_path):
+        self.model_path = model_path
+
+    def on_epoch_end(self, **data):
+        torch.save(data["model"].state_dict(), self.model_path)
+
+
 class AccumulateGradient(Callback):
     def __init__(self, gradient_acumulation=[5, 10, 15, 20, 30, 40]):
         self.gradient_acumulation = gradient_acumulation
