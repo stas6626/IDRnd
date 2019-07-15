@@ -1,0 +1,16 @@
+/src/workspace/data/files/Training_Data/human/human_00000.wav 1
+/src/workspace/data/files/Training_Data/human/human_00001.wav 1
+/src/workspace/data/files/Training_Data/human/human_00002.wav 1
+/src/workspace/data/files/Training_Data/human/human_00003.wav 1
+/src/workspace/data/files/Training_Data/human/human_00004.wav 1
+/src/workspace/data/files/Training_Data/human/human_00005.wav 1
+/src/workspace/data/files/Training_Data/human/human_00006.wav 1
+/src/workspace/data/files/Training_Data/human/human_00007.wav 1
+/src/workspace/data/files/Training_Data/human/human_00008.wav 1
+/src/workspace/data/files/Training_Data/human/human_00009.wav 1
+/src/workspace/data/files/Training_Data/human/human_00010.wav 1
+/src/workspace/data/files/Training_Data/human/human_00011.wav 1
+/src/workspace/data/files/Training_Data/human/human_00012.wav 1
+/src/workspace/data/files/Training_Data/human/human_00013.wav 1
+/src/workspace/data/files/Training_Data/human/human_00014.wav 1
+/src/workspace/data/files/Training_Data/human/human_00015.wav 1

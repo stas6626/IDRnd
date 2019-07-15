@@ -1,0 +1,293 @@
+
+2019-06-16 21:27:49
+
+
+     ////// CONFIG //////
+{
+    "network": {
+        "num_conv_blocks": 5,
+        "start_deep_supervision_on": 2,
+        "conv_base_depth": 64,
+        "growth_rate": 1.3,
+        "output_dropout": 0.0,
+        "aggregation_type": "max"
+    },
+    "data": {
+        "features": "mel_1024_512_64",
+        "_n_folds": 5,
+        "_kfold_seed": 42,
+        "_input_dim": 64,
+        "p_mixup": 0.0,
+        "p_aug": 0.0,
+        "max_audio_length": 10,
+        "_train_df": "data/train_df.csv",
+        "_train_data_dir": "data/Training_Data/"
+    },
+    "train": {
+        "accumulation_steps": 1,
+        "batch_size": 50,
+        "learning_rate": 0.001,
+        "scheduler": "1cycle_0.0001_0.005",
+        "optimizer": "adam",
+        "epochs": 15,
+        "_save_every": 5,
+        "weight_decay": 0.0,
+        "switch_off_augmentations_on": 50
+    },
+    "label": "2d_cnn"
+}
+
+
+   -----  Fold 0
+
+
+          ****** Epoch 0 ******
+
+
+Validation loss: 0.0325
+Validation metric: 0.9524
+
+Saving model on epoch 0
+
+          ****** Epoch 1 ******
+
+
+Validation loss: 0.0365
+Validation metric: 0.9386
+
+          ****** Epoch 2 ******
+
+
+Validation loss: 0.0161
+Validation metric: 0.9752
+
+          ****** Epoch 3 ******
+
+
+Validation loss: 0.0195
+Validation metric: 0.9703
+
+          ****** Epoch 4 ******
+
+
+Validation loss: 0.0094
+Validation metric: 0.9844
+
+          ****** Epoch 5 ******
+
+
+Validation loss: 0.0111
+Validation metric: 0.9826
+
+Saving model on epoch 5
+
+          ****** Epoch 6 ******
+
+
+Validation loss: 0.0141
+Validation metric: 0.9792
+
+          ****** Epoch 7 ******
+
+
+Validation loss: 0.0077
+Validation metric: 0.9884
+
+          ****** Epoch 8 ******
+
+
+Validation loss: 0.0073
+Validation metric: 0.9904
+
+          ****** Epoch 9 ******
+
+
+Validation loss: 0.0085
+Validation metric: 0.9897
+
+          ****** Epoch 10 ******
+
+
+Validation loss: 0.0082
+Validation metric: 0.9912
+
+Saving model on epoch 10
+
+          ****** Epoch 11 ******
+
+
+Validation loss: 0.0080
+Validation metric: 0.9913
+
+          ****** Epoch 12 ******
+
+
+Validation loss: 0.0088
+Validation metric: 0.9917
+
+          ****** Epoch 13 ******
+
+
+Validation loss: 0.0081
+Validation metric: 0.9918
+
+          ****** Epoch 14 ******
+
+
+Validation loss: 0.0078
+Validation metric: 0.9917
+
+
+   -----  Fold 1
+
+
+          ****** Epoch 0 ******
+
+
+Validation loss: 0.0346
+Validation metric: 0.9580
+
+Saving model on epoch 0
+
+          ****** Epoch 1 ******
+
+
+Validation loss: 0.1034
+Validation metric: 0.9210
+
+          ****** Epoch 2 ******
+
+
+Validation loss: 0.0175
+Validation metric: 0.9769
+
+          ****** Epoch 3 ******
+
+
+Validation loss: 0.0144
+Validation metric: 0.9772
+
+          ****** Epoch 4 ******
+
+
+Validation loss: 0.0143
+Validation metric: 0.9824
+
+          ****** Epoch 5 ******
+
+
+Validation loss: 0.0082
+Validation metric: 0.9887
+
+Saving model on epoch 5
+
+          ****** Epoch 6 ******
+
+
+Validation loss: 0.0082
+Validation metric: 0.9880
+
+          ****** Epoch 7 ******
+
+
+Validation loss: 0.0074
+Validation metric: 0.9898
+
+          ****** Epoch 8 ******
+
+
+Validation loss: 0.0066
+Validation metric: 0.9916
+
+          ****** Epoch 9 ******
+
+
+Validation loss: 0.0061
+Validation metric: 0.9917
+
+          ****** Epoch 10 ******
+
+
+Validation loss: 0.0067
+Validation metric: 0.9933
+
+Saving model on epoch 10
+
+          ****** Epoch 11 ******
+
+
+Validation loss: 0.0077
+Validation metric: 0.9924
+
+          ****** Epoch 12 ******
+
+
+Validation loss: 0.0080
+Validation metric: 0.9921
+
+          ****** Epoch 13 ******
+
+
+Validation loss: 0.0085
+Validation metric: 0.9923
+
+          ****** Epoch 14 ******
+
+
+Validation loss: 0.0084
+Validation metric: 0.9924
+
+
+   -----  Fold 2
+
+
+          ****** Epoch 0 ******
+
+
+Validation loss: 0.0436
+Validation metric: 0.9388
+
+Saving model on epoch 0
+
+          ****** Epoch 1 ******
+
+
+Validation loss: 0.0116
+Validation metric: 0.9834
+
+          ****** Epoch 2 ******
+
+
+2019-06-16 22:14:48
+
+
+Using mel features with params:
+ n_fft: 1024, hop_size: 512, n_mel: 64
+
+
+   -----  Fold 0
+
+
+2019-06-16 22:15:07
+
+
+Using mel features with params:
+ n_fft: 1024, hop_size: 512, n_mel: 64
+
+
+   -----  Fold 0
+
+
+2019-06-16 22:15:29
+
+
+Using mel features with params:
+ n_fft: 1024, hop_size: 512, n_mel: 64
+
+
+   -----  Fold 0
+
+
+
+   -----  Fold 1
+

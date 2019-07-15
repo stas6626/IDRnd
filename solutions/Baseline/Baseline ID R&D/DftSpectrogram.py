@@ -41,19 +41,20 @@ from keras.models import Model
 
 
 class DftSpectrogram(Layer):
-    
-    def __init__(self,
-                 length=200,
-                 shift=150,
-                 nfft=256,
-                 mode="abs",
-                 normalize_feature=False,
-                 normalize_signal=False,
-                 top=0,
-                 bottom=0,
-                 trainable=False,
-                 window=None,
-                 **kwargs):
+    def __init__(
+        self,
+        length=200,
+        shift=150,
+        nfft=256,
+        mode="abs",
+        normalize_feature=False,
+        normalize_signal=False,
+        top=0,
+        bottom=0,
+        trainable=False,
+        window=None,
+        **kwargs
+    ):
         """
         Requirements
         ------------
@@ -87,7 +88,14 @@ class DftSpectrogram(Layer):
         number of time point of output spectrogram: n_time = (input.shape[0] - length) / shift + 1
         """
         super(DftSpectrogram, self).__init__(**kwargs)
-        assert mode in ["abs", "complex", "real", "imag", "log", "phase"], NotImplementedError
+        assert mode in [
+            "abs",
+            "complex",
+            "real",
+            "imag",
+            "log",
+            "phase",
+        ], NotImplementedError
 
         self.trainable = trainable
         self.length = length
@@ -117,11 +125,12 @@ class DftSpectrogram(Layer):
         else:
             k = np.ones(nfft)
 
-        self.__real_kernel = np.asarray([np.cos(2 * np.pi * np.arange(0, nfft) * n / nfft)
-                                                  for n in range(nfft)])
-        self.__imag_kernel = -np.asarray([np.sin(2 * np.pi * np.arange(0, nfft) * n/ nfft)
-                                                  for n in range(nfft)])
-
+        self.__real_kernel = np.asarray(
+            [np.cos(2 * np.pi * np.arange(0, nfft) * n / nfft) for n in range(nfft)]
+        )
+        self.__imag_kernel = -np.asarray(
+            [np.sin(2 * np.pi * np.arange(0, nfft) * n / nfft) for n in range(nfft)]
+        )
 
         if input_shape[-1] > 1:
             self.__real_kernel = self.__real_kernel[:, np.newaxis, :]
@@ -131,11 +140,15 @@ class DftSpectrogram(Layer):
             self.__imag_kernel = self.__imag_kernel[:, np.newaxis, :]
 
         if self.length < self.nfft:
-            self.__real_kernel[length - nfft:, :, :] = 0.0
-            self.__imag_kernel[length - nfft:, :, :] = 0.0
+            self.__real_kernel[length - nfft :, :, :] = 0.0
+            self.__imag_kernel[length - nfft :, :, :] = 0.0
 
-        self.real_kernel = K.variable(self.__real_kernel, dtype=K.floatx(), name="real_kernel")
-        self.imag_kernel = K.variable(self.__imag_kernel, dtype=K.floatx(), name="imag_kernel")
+        self.real_kernel = K.variable(
+            self.__real_kernel, dtype=K.floatx(), name="real_kernel"
+        )
+        self.imag_kernel = K.variable(
+            self.__imag_kernel, dtype=K.floatx(), name="imag_kernel"
+        )
 
         self.real_kernel.values = self.__real_kernel
         self.imag_kernel.values = self.__imag_kernel
@@ -151,8 +164,9 @@ class DftSpectrogram(Layer):
 
     def call(self, inputs, **kwargs):
         if self.normalize_signal:
-            inputs = (inputs - K.mean(inputs, axis=(1, 2), keepdims=True)) /\
-                     (K.std(inputs, axis=(1, 2), keepdims=True) + K.epsilon())
+            inputs = (inputs - K.mean(inputs, axis=(1, 2), keepdims=True)) / (
+                K.std(inputs, axis=(1, 2), keepdims=True) + K.epsilon()
+            )
 
         if self.length < self.nfft:
             inputs = ZeroPadding1D(padding=(0, self.nfft - self.length))(inputs)
@@ -160,14 +174,22 @@ class DftSpectrogram(Layer):
         real_part = []
         imag_part = []
         for n in range(inputs.shape[-1]):
-            real_part.append(K.conv1d(K.expand_dims(inputs[:, :, n]),
-                                      kernel=self.real_kernel,
-                                      strides=self.shift,
-                                      padding="valid"))
-            imag_part.append(K.conv1d(K.expand_dims(inputs[:, :, n]),
-                                      kernel=self.imag_kernel,
-                                      strides=self.shift,
-                                      padding="valid"))
+            real_part.append(
+                K.conv1d(
+                    K.expand_dims(inputs[:, :, n]),
+                    kernel=self.real_kernel,
+                    strides=self.shift,
+                    padding="valid",
+                )
+            )
+            imag_part.append(
+                K.conv1d(
+                    K.expand_dims(inputs[:, :, n]),
+                    kernel=self.imag_kernel,
+                    strides=self.shift,
+                    padding="valid",
+                )
+            )
 
         real_part = K.stack(real_part, axis=-1)
         imag_part = K.stack(imag_part, axis=-1)
@@ -185,19 +207,28 @@ class DftSpectrogram(Layer):
         elif self.mode == "complex":
             fft = K.concatenate((real_part, imag_part), axis=-1)
         elif self.mode == "log":
-            fft = K.clip(K.sqrt(K.square(real_part) + K.square(imag_part)), K.epsilon(), None)
+            fft = K.clip(
+                K.sqrt(K.square(real_part) + K.square(imag_part)), K.epsilon(), None
+            )
             fft = K.log(fft) / np.log(10)
 
-        fft = K.permute_dimensions(fft, (0, 2, 1, 3))[:, :self.nfft // 2, :, :]
+        fft = K.permute_dimensions(fft, (0, 2, 1, 3))[:, : self.nfft // 2, :, :]
         if self.normalize_feature:
             if self.mode == "complex":
-                warnings.warn("spectrum normalization will not applied with mode == \"complex\"")
+                warnings.warn(
+                    'spectrum normalization will not applied with mode == "complex"'
+                )
             else:
                 fft = (fft - K.mean(fft, axis=1, keepdims=True)) / (
-                        K.std(fft, axis=1, keepdims=True) + K.epsilon())
+                    K.std(fft, axis=1, keepdims=True) + K.epsilon()
+                )
 
         # fft = fft[:, self.bottom:-1 * self.top, :, :]
+<<<<<<< HEAD
+        if K.common.image_dim_ordering() is "th":
+=======
         if K.common.image_dim_ordering() is 'th':
+>>>>>>> 627a09b06e7379c4ea4e77aa8eca7902f2674035
             fft = K.permute_dimensions(fft, (0, 3, 1, 2))
 
         return fft
@@ -211,7 +242,11 @@ class DftSpectrogram(Layer):
         else:
             times = ((input_shape[1] - self.length) + self.shift) // self.shift
 
+<<<<<<< HEAD
+        if K.common.image_dim_ordering() is "th":
+=======
         if K.common.image_dim_ordering() is 'th':
+>>>>>>> 627a09b06e7379c4ea4e77aa8eca7902f2674035
             output_shape = [input_shape[0], input_shape[0], self.nfft // 2, times]
         else:
             output_shape = [input_shape[0], self.nfft // 2, times, input_shape[-1]]
@@ -221,15 +256,15 @@ class DftSpectrogram(Layer):
 
     def get_config(self):
         config = {
-            'length': self.length,
-            'shift': self.shift,
-            'nfft': self.nfft,
-            'mode': self.mode,
-            'top': self.top,
-            'bottom': self.bottom,
-            'trainable': self.trainable,
-            'normalize_feature': self.normalize_feature,
-            'normalize_signal': self.normalize_signal
+            "length": self.length,
+            "shift": self.shift,
+            "nfft": self.nfft,
+            "mode": self.mode,
+            "top": self.top,
+            "bottom": self.bottom,
+            "trainable": self.trainable,
+            "normalize_feature": self.normalize_feature,
+            "normalize_signal": self.normalize_signal,
         }
         base_config = super(DftSpectrogram, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

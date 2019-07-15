@@ -1,6 +1,7 @@
 data/
 solutions/Freesound/pickles
 solutions/models
+solutions/runs/
 
 .vscode
 __pycache__

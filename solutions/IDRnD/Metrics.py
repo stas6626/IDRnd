@@ -66,8 +66,8 @@ def compute_act_c(pt, tar, imp, c_miss=1, c_fa=1):
 
 
 def compute_llr_c(tar, imp):
-    sum_tar = np.sum([np.log(1. + 1. / np.exp(score)) for score in tar])
-    sum_imp = np.sum([np.log(1. + np.exp(score)) for score in imp])
+    sum_tar = np.sum([np.log(1.0 + 1.0 / np.exp(score)) for score in tar])
+    sum_imp = np.sum([np.log(1.0 + np.exp(score)) for score in imp])
 
     c_llr = 1 / (2 * np.log(2)) * (sum_tar / len(tar) + sum_imp / len(imp))
 
@@ -79,19 +79,23 @@ def get_eer(tar, imp):
 
 
 def get_min_c(p_target, tar, imp, c_miss=1, c_fa=1):
-    if not hasattr(p_target, '__iter__'):
+    if not hasattr(p_target, "__iter__"):
         p_target = [p_target]
 
-    values = list(map(lambda pt: compute_min_c(pt, tar, imp, c_miss, c_fa)[0], p_target))
+    values = list(
+        map(lambda pt: compute_min_c(pt, tar, imp, c_miss, c_fa)[0], p_target)
+    )
 
     return sum(values) / len(values)
 
 
 def get_act_c(p_target, tar, imp, c_miss=1, c_fa=1):
-    if not hasattr(p_target, '__iter__'):
+    if not hasattr(p_target, "__iter__"):
         p_target = [p_target]
 
-    values = list(map(lambda pt: compute_act_c(pt, tar, imp, c_miss, c_fa)[0], p_target))
+    values = list(
+        map(lambda pt: compute_act_c(pt, tar, imp, c_miss, c_fa)[0], p_target)
+    )
 
     return sum(values) / len(values)
 
@@ -103,8 +107,8 @@ def get_llr_c(tar, imp):
 def get_fr_fa_at_threshold(tar, imp, threshold=0.5):
     fr = len(np.where(tar < threshold)[0])
     fa = len(np.where(imp > threshold)[0])
-    fr = fr * 100. / len(tar)
-    fa = fa * 100. / len(imp)
+    fr = fr * 100.0 / len(tar)
+    fa = fa * 100.0 / len(imp)
     return fr, fa
 
 

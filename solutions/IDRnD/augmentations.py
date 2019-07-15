@@ -34,8 +34,8 @@ class RandomNoise:
 
     def __call__(self, audio):
         if random.random() < self.p:
-        #noise = numpy.random.normal(0, self.std, len(audio))
-            return audio+np.random.normal(0, self.std, len(audio))
+            # noise = numpy.random.normal(0, self.std, len(audio))
+            return audio + np.random.normal(0, self.std, len(audio))
         else:
             return audio
 
@@ -123,33 +123,50 @@ class ToMellSpec:
         self.n_mels = n_mels
 
     def __call__(self, audio):
-        mel = librosa.feature.melspectrogram(audio, sr=16000, n_mels=self.n_mels,
-                                             n_fft=self.n_fft, hop_length=self.hop_length)
+        mel = librosa.feature.melspectrogram(
+            audio,
+            sr=16000,
+            n_mels=self.n_mels,
+            n_fft=self.n_fft,
+            hop_length=self.hop_length,
+        )
         return mel
 
 
 class PadOrClip:
-    def __init__(self, pad_lenth):
+    def __init__(self, pad_lenth, save_mean_and_var=True):
         self.pad_lenth = pad_lenth
+        self.save_mean_and_var = save_mean_and_var
 
     def __call__(self, mel):
         if len(mel.shape) == 2:
             if mel.shape[1] < self.pad_lenth:
-                mel = np.pad(mel, [(0, 0), (0, self.pad_lenth-mel.shape[1])], "constant")
+                if self.save_mean_and_var:
+                    mean, std = np.mean(mel), np.std(mel)
+
+                init_shape = mel.shape[1]
+                mel = np.pad(
+                    mel, [(0, 0), (0, self.pad_lenth - init_shape)], "constant"
+                )
+                if self.save_mean_and_var:
+                    normal = np.random.normal(
+                        mean, std, size=(mel.shape[0], self.pad_lenth - init_shape)
+                    )
+                    mel[:, init_shape:] = normal
             else:
                 right_limit = mel.shape[1] - self.pad_lenth
                 shift = random.randint(0, right_limit)
-                mel = mel[:, shift: shift+self.pad_lenth]
+                mel = mel[:, shift : shift + self.pad_lenth]
             return mel
 
         elif len(mel.shape) == 1:
             if mel.shape[0] < self.pad_lenth:
-                mel = np.pad(mel, [0, self.pad_lenth-mel.shape[0]], "constant")
+                mel = np.pad(mel, [0, self.pad_lenth - mel.shape[0]], "constant")
 
             else:
                 right_limit = mel.shape[0] - self.pad_lenth
                 shift = random.randint(0, right_limit)
-                mel = mel[shift: shift+self.pad_lenth]
+                mel = mel[shift : shift + self.pad_lenth]
             return mel
 
 
@@ -174,10 +191,11 @@ class MinMaxChunkScaler:
         len_ = len(audio) // self.chunk
 
         for i in range(self.chunk):
-            X = audio[len_*i: len_*(i+1)]
-            if (X.max() - X.min()) == 0: continue
+            X = audio[len_ * i : len_ * (i + 1)]
+            if (X.max() - X.min()) == 0:
+                continue
 
             X_std = (X - X.min()) / (X.max() - X.min())
             X_scaled = X_std * (max_ - min_) + min_
-            audio[len_*i: len_*(i+1)] = X_scaled
+            audio[len_ * i : len_ * (i + 1)] = X_scaled
         return audio

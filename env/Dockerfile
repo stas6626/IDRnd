@@ -84,6 +84,15 @@ RUN conda install -c conda-forge librosa
 
 RUN conda install -c fastai fastprogress
 
-RUN pip install tb-nightly future
+RUN pip install tb-nightly future black
 
-RUN conda install -c trent-b iterative-stratification
+RUN apt-get update 
+
+RUN apt-get install -y zsh 
+
+RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
+
+RUN jupyter labextension install @jupyterlab/git
+RUN pip install --upgrade jupyterlab-git
+RUN jupyter serverextension enable --py jupyterlab_git
+RUN git config --global user.name "Prikhodko Stanislav" && git config --global user.email "doga05@bk.ru"

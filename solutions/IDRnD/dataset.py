@@ -4,9 +4,11 @@ import librosa
 import torch
 import numpy as np
 import glob
+from scipy.io.wavfile import read
+import pandas as pd
 
 
-class Base_Dataset(Dataset):
+class BaseDataset(Dataset):
     def __init__(self, X, y, transforms=None):
         super().__init__()
         self.X = X
@@ -35,8 +37,14 @@ class Base_Dataset(Dataset):
         label = torch.Tensor([label]).float()
         return label
 
+class BaseDatasetScipy(BaseDataset):
+    def get_audio(self, idx):
+        _, audio = read(self.X[idx])
+        audio = (audio / 2**16) + 0.5
+        return audio
+    
 
-class Test_Dataset(Base_Dataset):
+class Test_Dataset(BaseDataset):
     def __init__(self, X, transforms=None):
         super().__init__(X, None, transforms=transforms)
 
@@ -44,7 +52,7 @@ class Test_Dataset(Base_Dataset):
         return self.X[idx]
 
 
-class MelDataset(Base_Dataset):
+class MelDataset(BaseDataset):
     def __init__(self, X, y, folder, transforms=None):
         super().__init__(X, y, transforms=transforms)
         self.folder = folder
@@ -54,7 +62,8 @@ class MelDataset(Base_Dataset):
     def load(self):
         data = os.listdir(self.folder)
         for name in data:
-            if name == ".ipynb_checkpoints": continue
+            if name == ".ipynb_checkpoints":
+                continue
             idx = int(name.split("_")[1].split(".")[0])
             if name not in self.pathes[idx]:
                 self.pathes[idx][name] = 0
@@ -69,11 +78,50 @@ class MelDataset(Base_Dataset):
         return mel
 
 
-def get_train_data():
+class SimpleMelDataset(BaseDataset):
+    def __init__(self, X, y, folder, transforms=None):
+        super().__init__(X, y, transforms=transforms)
+        self.folder = folder
+
+    def get_audio(self, idx):
+        path = os.path.join(self.folder, self.X[idx])
+        mel = np.load(path)
+        return mel
+
+
+def get_train_data(drop_dublicates=True):
     dataset_dir = "/src/workspace/data/files/"
     train_dataset_dir = os.path.join(dataset_dir, "Training_Data/")
 
-    X = sorted(glob.glob(os.path.join(train_dataset_dir, '**/*.wav'), recursive=True))
+    X = sorted(glob.glob(os.path.join(train_dataset_dir, "**/*.wav"), recursive=True))
     y = np.array([1 if "human" in i else 0 for i in X])
     X = np.array(X)
+
+    if drop_dublicates:
+        white_list = np.load("IDRnD/data/white_list.npy")
+        X, y = X[white_list], y[white_list]
+    X = np.array([x.split("/")[-1].split(".")[0] + ".npy" for x in X])
     return X, y
+
+def get_common_voices():
+    common = []
+    all_files = os.listdir("../data/files/raw_mels/")
+    for file in all_files:
+        if file.startswith("common"):
+            common.append(file)
+
+    common_X = np.array(common)
+    common_y = np.ones_like(common_X, dtype=np.int16)
+    return common_X, common_y
+
+def get_old_competition_dataset():
+    old_spoof1 = pd.read_csv("/data_spoof/CM_protocol/cm_train.trn", sep = ' ', names=["folder", "filename", "wat", "class"])
+    old_spoof2 = pd.read_csv("/data_spoof/CM_protocol/cm_evaluation.ndx", sep = ' ', names=["folder", "filename", "wat", "class"])
+    old_spoof3 = pd.read_csv("/data_spoof/CM_protocol/cm_develop.ndx", sep = ' ', names=["folder", "filename", "wat", "class"])
+    old_spoof = pd.concat([old_spoof1, old_spoof2, old_spoof3])
+    old_spoof.reset_index(drop=True, inplace=True)
+
+    pathes_old_competition = np.array(old_spoof["filename"].apply(lambda x: x+".npy"))
+    maping = {"spoof":0, "human":1}
+    classes_old_competition = np.array(old_spoof["class"].apply(lambda x: maping[x]))
+    return pathes_old_competition, classes_old_competition
