@@ -10,6 +10,5 @@ def train_validation_data_stratified(ids, labels, n_folds, seed, groups=None):
             n_folds, shuffle=True, random_state=seed).split(ids, labels):
             yield train, valid
     else:
-        for train, valid in GroupKFold(
-            n_folds, shuffle=True, random_state=seed).split(ids, labels, groups):
+        for train, valid in GroupKFold(n_folds, ).split(ids, labels, groups):
             yield train, valid
