@@ -15,7 +15,10 @@ def compute_inverse_eer(y_true, scores):
 
     fpr, tpr, thresholds = roc_curve(y_true, scores, pos_label=1)
     fnr = 1 - tpr
-    eer = fpr[np.nanargmin(np.absolute((fnr - fpr)))]
+    try:
+        eer = fpr[np.nanargmin(np.absolute((fnr - fpr)))]
+    except ValueError:
+        eer = 0.0  # TODO: fix this
     return 1 - eer
 
 
