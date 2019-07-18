@@ -117,7 +117,7 @@ def get_common_voices():
     return common_X, common_y
 
 
-def get_old_competition_dataset():
+def get_old_competition_dataset(return_wav=False):
     old_spoof1 = pd.read_csv(
         "/data_spoof/CM_protocol/cm_train.trn",
         sep=" ",
@@ -135,8 +135,10 @@ def get_old_competition_dataset():
     )
     old_spoof = pd.concat([old_spoof1, old_spoof2, old_spoof3])
     old_spoof.reset_index(drop=True, inplace=True)
-
-    pathes_old_competition = np.array(old_spoof["filename"].apply(lambda x: x + ".npy"))
+    if return_wav:
+        pathes_old_competition = np.array(old_spoof[["folder", "filename"]].apply(lambda x: os.path.join("/data_spoof/wav/", x[0], x[1] + ".wav"), axis=1))
+    else:
+        pathes_old_competition = np.array(old_spoof["filename"].apply(lambda x: x + ".npy"))
     maping = {"spoof": 0, "human": 1}
     classes_old_competition = np.array(old_spoof["class"].apply(lambda x: maping[x]))
     return pathes_old_competition, classes_old_competition

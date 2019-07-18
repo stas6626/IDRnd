@@ -33,24 +33,23 @@ class Train:
                     callback.on_train_batch_end(loss=loss.item(), iteration=tr_cnt)
                 tr_cnt += 1
 
-            if val_loader is None:
-                continue
+            if val_loader is not None:
 
-            model.eval()
-            valid_preds = np.zeros((len(val_loader.dataset), 1))
+                model.eval()
+                valid_preds = np.zeros((len(val_loader.dataset), 1))
 
-            for i, (x_batch, y_batch) in enumerate(val_loader):
-                with torch.no_grad():
-                    preds = model(x_batch.float().cuda()).detach()
-                    loss = criterion(preds, y_batch.cuda())
+                for i, (x_batch, y_batch) in enumerate(val_loader):
+                    with torch.no_grad():
+                        preds = model(x_batch.float().cuda()).detach()
+                        loss = criterion(preds, y_batch.cuda())
 
-                valid_preds[
-                    i * val_loader.batch_size : (i + 1) * val_loader.batch_size
-                ] = preds.cpu().numpy()
+                    valid_preds[
+                        i * val_loader.batch_size : (i + 1) * val_loader.batch_size
+                    ] = preds.cpu().numpy()
 
-                val_cnt += 1
-                for callback in self.callbacks:
-                    callback.on_val_batch_end(loss=loss.item(), iteration=val_cnt)
+                    val_cnt += 1
+                    for callback in self.callbacks:
+                        callback.on_val_batch_end(loss=loss.item(), iteration=val_cnt)
 
             for callback in self.callbacks:
                 callback.on_epoch_end(
