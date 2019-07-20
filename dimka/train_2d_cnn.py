@@ -204,9 +204,14 @@ with Experiment({
     if args.max_samples:
         train_df = train_df.sample(args.max_samples).reset_index(drop=True)
 
+    if "cluster" in train_df:
+        groups = train_df.cluster.tolist()
+    else:
+        groups = None
+
     splits = list(train_validation_data_stratified(
         train_df.fname, train_df.labels,
-        config.data._n_folds, config.data._kfold_seed))
+        config.data._n_folds, config.data._kfold_seed, groups))
 
     for fold in args.folds:
 
