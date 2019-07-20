@@ -97,4 +97,4 @@ RUN pip install --upgrade jupyterlab-git
 RUN jupyter serverextension enable --py jupyterlab_git
 RUN git config --global user.name "Prikhodko Stanislav" && git config --global user.email "doga05@bk.ru"
 
-RUN pip install git+https://github.com/ex4sperans/mag.git
+#RUN pip install git+https://github.com/ex4sperans/mag.git

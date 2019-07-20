@@ -19,6 +19,7 @@ def seed_everything(seed):
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
 
+
 def compute_eer(y_true, y_pred):
     fpr, tpr, thresholds = roc_curve(y_true, y_pred, pos_label=1)
 

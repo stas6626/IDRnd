@@ -9,7 +9,6 @@ class Train:
         self.acumulate_factor = 1
 
     def fit(self, train_loader, val_loader, model, criterion, optimizer, epoches=100):
-
         for callback in self.callbacks:
             callback.on_train_begin()
 
@@ -52,12 +51,15 @@ class Train:
                         callback.on_val_batch_end(loss=loss.item(), iteration=val_cnt)
 
             for callback in self.callbacks:
-                callback.on_epoch_end(
+                res = callback.on_epoch_end(
                     epoch=epoch,
                     y_true=val_loader.dataset.y,
                     y_pred=valid_preds.reshape(-1),
                     model=model.module,
                 )
+                if res in not None:
+                    stop = res.get("stop")
+            if stop: break
 
     def predict_on_test(self, test_loader, model):
         all_outputs, all_fnames = [], []

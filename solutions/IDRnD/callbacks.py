@@ -3,6 +3,7 @@ try:
 except ImportError:
     print("No tensorboard")
 import torch
+import numpy as np
 
 
 class Callback(object):
@@ -125,3 +126,33 @@ class EpochScheduler(Callback):
 
     def on_epoch_end(self, **data):
         self.scheduler.step(self.sum_train_loss)
+
+
+class EarlyStop(Callback):
+    def __init__(self, scorer, mode="min", patience=1):
+        if mode == "min":
+            self.compression_function = np.less
+            self.state = np.inf
+        elif mode == "max":
+            self.compression_function = np.greater
+            self.state = -np.inf
+        else:
+            raise "Not implemented mode"
+
+        self.patience = patience
+        self.scorer = scorer
+
+    def on_train_begin(self):
+        self.counter = 0
+
+    def on_epoch_end(self, **data):
+        score = self.scorer(data["y_true"], data["y_pred"])
+        if self.compression_function(score, self.state):
+            self.state = score
+            self.counter = 0
+        else:
+            self.counter += 1
+        
+        if self.counter >= self.patience:
+            return {"stop": True}
+            
