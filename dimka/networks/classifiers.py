@@ -12,7 +12,7 @@ import torchvision.utils
 from tensorboardX import SummaryWriter
 
 from ops.training import OPTIMIZERS, make_scheduler, make_step
-from networks.losses import binary_cross_entropy, focal_loss
+from networks.losses import binary_cross_entropy, focal_loss, lsep_loss
 from ops.utils import (
     make_mel_filterbanks, is_mel, is_stft, compute_torch_stft, compute_inverse_eer)
 
@@ -231,7 +231,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 class_logits = outputs["class_logits"].squeeze(-1)
 
                 loss = (
-                    focal_loss(
+                    lsep_loss(
                         class_logits,
                         labels,
                     )
@@ -244,6 +244,8 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                     self.optimizer.step()
                     accumulated_loss = 0
                     self.optimizer.zero_grad()
+
+                class_logits = class_logits[:, 0]  # human is 1
 
                 probs = torch.sigmoid(class_logits).data.cpu().numpy()
                 labels = labels.data.cpu().numpy()
@@ -286,7 +288,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 class_logits = outputs["class_logits"].squeeze(-1)
 
                 loss = (
-                    focal_loss(
+                    lsep_loss(
                         class_logits,
                         labels,
                     )
@@ -295,6 +297,8 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 multiplier = len(labels) / len(loader.dataset)
 
                 valid_loss += loss * multiplier
+
+                class_logits = class_logits[:, 0]  # human is 1
 
                 class_probs = torch.sigmoid(class_logits).data.cpu().numpy()
                 labels = labels.data.cpu().numpy()
@@ -338,7 +342,9 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
 
                 outputs = self(signal)
 
-                class_logits = outputs["class_logits"].squeeze(-1)
+                class_logits = class_logits[:, 0]  # human is 1
+
+                class_logits = outputs["class_logits"]
 
                 probs = torch.sigmoid(class_logits).data.cpu().numpy()
                 all_class_probs.extend(probs)

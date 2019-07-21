@@ -29,7 +29,9 @@ class AntispoofDataset(data.Dataset):
         )
 
         if self.labels is not None:
-            sample["labels"] = self.labels[index]
+            label = self.labels[index]
+            labels = np.array([1.0, 0.0]) if label == 1 else np.array([0.0, 1.0])
+            sample["labels"] = labels
 
         if self.transform is not None:
             sample = self.transform(dataset=self, **sample)
