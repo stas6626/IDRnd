@@ -3,6 +3,7 @@ try:
 except ImportError:
     print("No tensorboard")
 import torch
+import numpy as np
 
 
 class Callback(object):
@@ -41,10 +42,20 @@ class TensorBoardCallback(Callback):
     def on_train_begin(self):
         self.writer = SummaryWriter()
 
+    def on_epoch_begin(self, **data):
+        self.average_train_loss = 0
+        self.train_counter = 0
+        self.average_val_loss = 0
+        self.val_counter = 0
+
     def on_train_batch_end(self, **data):
+        self.average_train_loss += data["loss"]
+        self.train_counter += 1
         self.writer.add_scalar("train_loss", data["loss"], data["iteration"])
 
     def on_val_batch_end(self, **data):
+        self.average_val_loss += data["loss"]
+        self.val_counter += 1
         self.writer.add_scalar("val_loss", data["loss"], data["iteration"])
 
     def on_epoch_end(self, **data):
@@ -53,6 +64,15 @@ class TensorBoardCallback(Callback):
         score = self.scorer(data["y_true"], data["y_pred"])
         self.writer.add_scalar("val_error", score, data["epoch"])
 
+        self.writer.add_scalar(
+            "avg_train_loss",
+            self.average_train_loss / self.train_counter,
+            data["epoch"],
+        )
+        self.writer.add_scalar(
+            "avg_val_loss", self.average_val_loss / self.val_counter, data["epoch"]
+        )
+
 
 class SaveEveryEpoch(Callback):
     def __init__(self, model_path):
@@ -60,6 +80,14 @@ class SaveEveryEpoch(Callback):
 
     def on_epoch_end(self, **data):
         torch.save(data["model"].state_dict(), self.model_path + str(data["epoch"]))
+
+
+class SaveLastEpoch(Callback):
+    def __init__(self, model_path):
+        self.model_path = model_path
+
+    def on_epoch_end(self, **data):
+        torch.save(data["model"].state_dict(), self.model_path)
 
 
 class AccumulateGradient(Callback):
@@ -98,3 +126,33 @@ class EpochScheduler(Callback):
 
     def on_epoch_end(self, **data):
         self.scheduler.step(self.sum_train_loss)
+
+
+class EarlyStop(Callback):
+    def __init__(self, scorer, mode="min", patience=1):
+        if mode == "min":
+            self.compression_function = np.less
+            self.state = np.inf
+        elif mode == "max":
+            self.compression_function = np.greater
+            self.state = -np.inf
+        else:
+            raise "Not implemented mode"
+
+        self.patience = patience
+        self.scorer = scorer
+
+    def on_train_begin(self):
+        self.counter = 0
+
+    def on_epoch_end(self, **data):
+        score = self.scorer(data["y_true"], data["y_pred"])
+        if self.compression_function(score, self.state):
+            self.state = score
+            self.counter = 0
+        else:
+            self.counter += 1
+        
+        if self.counter >= self.patience:
+            return {"stop": True}
+            
