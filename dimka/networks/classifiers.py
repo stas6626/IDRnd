@@ -17,6 +17,10 @@ from ops.utils import (
     make_mel_filterbanks, is_mel, is_stft, compute_torch_stft, compute_inverse_eer)
 
 
+def take_first_column(x):
+    return x[:, 0]
+
+
 class ResnetBlock2d(nn.Module):
 
     def __init__(self, depth):
@@ -118,7 +122,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
             nn.BatchNorm1d(total_depth),
             nn.PReLU(total_depth),
             nn.Dropout(p=self.config.network.output_dropout),
-            nn.Linear(total_depth, 1)
+            nn.Linear(total_depth, 2)
         )
 
         self.to(self.device)
@@ -231,7 +235,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 class_logits = outputs["class_logits"].squeeze(-1)
 
                 loss = (
-                    lsep_loss(
+                    focal_loss(
                         class_logits,
                         labels,
                     )
@@ -245,7 +249,8 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                     accumulated_loss = 0
                     self.optimizer.zero_grad()
 
-                class_logits = class_logits[:, 0]  # human is 1
+                class_logits = take_first_column(class_logits)  # human is 1
+                labels = take_first_column(labels)
 
                 probs = torch.sigmoid(class_logits).data.cpu().numpy()
                 labels = labels.data.cpu().numpy()
@@ -288,7 +293,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 class_logits = outputs["class_logits"].squeeze(-1)
 
                 loss = (
-                    lsep_loss(
+                    focal_loss(
                         class_logits,
                         labels,
                     )
@@ -298,7 +303,8 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
 
                 valid_loss += loss * multiplier
 
-                class_logits = class_logits[:, 0]  # human is 1
+                class_logits = take_first_column(class_logits)  # human is 1
+                labels = take_first_column(labels)
 
                 class_probs = torch.sigmoid(class_logits).data.cpu().numpy()
                 labels = labels.data.cpu().numpy()
@@ -342,9 +348,8 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
 
                 outputs = self(signal)
 
-                class_logits = class_logits[:, 0]  # human is 1
-
                 class_logits = outputs["class_logits"]
+                class_logits = class_logits[:, 0]  # human is 1
 
                 probs = torch.sigmoid(class_logits).data.cpu().numpy()
                 all_class_probs.extend(probs)
