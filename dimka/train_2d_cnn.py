@@ -328,7 +328,7 @@ with Experiment({
             pd.read_csv(file) for file in val_df_files]).reset_index(drop=True)
 
         labels = np.asarray([
-            item["labels"] for item in AntispoofDataset(
+            item["labels"][0] for item in AntispoofDataset(
                 audio_files=train_df.fname.tolist(),
                 labels=train_df.labels.values,
                 transform=None
