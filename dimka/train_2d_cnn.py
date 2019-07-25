@@ -18,7 +18,8 @@ from ops.transforms import (
     Compose, DropFields, LoadAudio,
     AudioFeatures, MapLabels, RenameFields,
     MixUp, SampleSegment, SampleLongAudio,
-    AudioAugmentation, ShuffleAudio, CutOut, Identity)
+    AudioAugmentation, ShuffleAudio, CutOut, Identity,
+    LoadMel)
 from ops.utils import load_json, compute_inverse_eer
 from ops.padding import make_collate_fn
 
