@@ -42,6 +42,14 @@ parser.add_argument(
     help="path to train data"
 )
 parser.add_argument(
+    "--pseuodolabeled_df", type=str,
+    help="path to pseudolabeled dataframe"
+)
+parser.add_argument(
+    "--pseudolabeled_data_dir", type=str,
+    help="path to pseudolabeled data"
+)
+parser.add_argument(
     "--resume", action="store_true", default=False,
     help="allow resuming even if experiment exists"
 )
@@ -202,6 +210,9 @@ with Experiment({
 
     train_df = pd.read_csv(args.train_df)
 
+    if args.pseudolabeled_df is not None:
+        pseudolabeled_df = pd.read_csv(args.pseudolabeled_df)
+
     if args.max_samples:
         train_df = train_df.sample(args.max_samples).reset_index(drop=True)
 
@@ -227,12 +238,22 @@ with Experiment({
         experiment.register_directory("checkpoints")
         experiment.register_directory("predictions")
 
+        if args.pseudolabeled_df is not None:
+            pseudolabeled_audio_files = [
+                os.path.join(args.pseudolabeled_data_dir, fname)
+                for fname in pseudolabeled_df.fname.values]
+            pseudolabeled_labels = pseudolabeled_df.labels.values
+        else:
+            pseudolabeled_audio_files = []
+            pseudolabeled_labels = []
+
         train_loader = torch.utils.data.DataLoader(
             AntispoofDataset(
                 audio_files=[
                     os.path.join(args.train_data_dir, fname)
-                    for fname in train_df.fname.values[train]],
-                labels=train_df.labels.values[train],
+                    for fname in train_df.fname.values[train]
+                ] + pseudolabeled_audio_files,
+                labels=train_df.labels.values[train].tolist() + pseudolabeled_labels,
                 transform=Compose([
                     LoadAudio(),
                     SampleLongAudio(max_length=args.max_audio_length),
