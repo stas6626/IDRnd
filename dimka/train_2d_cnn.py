@@ -242,7 +242,7 @@ with Experiment({
             pseudolabeled_audio_files = [
                 os.path.join(args.pseudolabeled_data_dir, fname)
                 for fname in pseudolabeled_df.fname.values]
-            pseudolabeled_labels = pseudolabeled_df.labels.values
+            pseudolabeled_labels = pseudolabeled_df.labels.tolist()
         else:
             pseudolabeled_audio_files = []
             pseudolabeled_labels = []
