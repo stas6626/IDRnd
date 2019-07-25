@@ -125,6 +125,31 @@ class LoadAudio:
         return transformed
 
 
+def to_mel_spec(audio, n_fft=2048, hop_length=512, n_mels=128):
+    return librosa.feature.melspectrogram(
+        audio,
+        sr=16000,
+        n_mels=self.n_mels,
+        n_fft=self.n_fft,
+        hop_length=self.hop_length,
+    )
+
+
+class LoadMel:
+
+    def __init__(self):
+
+        pass
+
+    def __call__(self, dataset, **inputs):
+
+        mel = np.load(inputs["filename"])
+        transformed = dict(**inputs)
+        transformed["mel"] = spec
+
+        return mel
+
+
 class STFT:
 
     eps = 1e-4
@@ -202,21 +227,44 @@ class AudioFeatures:
                     "\nUsing raw waveform features."
                 )
 
+        # precomputed mels
+        elif name == "premel":
+
+            n_fft, hop_size, n_mel = args
+            self.n_fft = int(n_fft)
+            self.hop_size = int(hop_size)
+            self.n_mel = int(n_mel)
+
+            self.n_features = self.n_mel
+            self.padding_value = 0.0
+
+            if verbose:
+                print(
+                    "\nUsing premel features with params:\n",
+                    "n_fft: {}, hop_size: {}, n_mel: {}".format(
+                        n_fft, hop_size, n_mel
+                    )
+                )
+
 
     def __call__(self, dataset, **inputs):
 
         transformed = dict(inputs)
 
         if self.feature_type == "stft":
-
             transformed["signal"] = np.expand_dims(inputs["audio"], -1)
 
         elif self.feature_type == "mel":
-
             transformed["signal"] = np.expand_dims(inputs["audio"], -1)
 
         elif self.feature_type == "raw":
             transformed["signal"] = np.expand_dims(inputs["audio"], -1)
+
+        elif self.feature_type == "premel":
+            if "mel" in inputs:
+                transformed["signal"] = inputs["mel"]
+            else:
+                transformed["signal"] = to_mel_spec(inputs["audio"])
 
         return transformed
 

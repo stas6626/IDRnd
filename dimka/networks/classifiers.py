@@ -14,7 +14,8 @@ from tensorboardX import SummaryWriter
 from ops.training import OPTIMIZERS, make_scheduler, make_step
 from networks.losses import binary_cross_entropy, focal_loss, lsep_loss
 from ops.utils import (
-    make_mel_filterbanks, is_mel, is_stft, compute_torch_stft, compute_inverse_eer)
+    make_mel_filterbanks, is_mel, is_stft, is_precomputed,
+    compute_torch_stft, compute_inverse_eer)
 
 
 def take_first_column(x):
