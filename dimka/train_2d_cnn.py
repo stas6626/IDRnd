@@ -42,7 +42,7 @@ parser.add_argument(
     help="path to train data"
 )
 parser.add_argument(
-    "--pseuodolabeled_df", type=str,
+    "--pseudolabeled_df", type=str,
     help="path to pseudolabeled dataframe"
 )
 parser.add_argument(
