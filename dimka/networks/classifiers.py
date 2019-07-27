@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 import torchvision.utils
 from tensorboardX import SummaryWriter
+from torchcontrib.optim import SWA
 
 from ops.training import OPTIMIZERS, make_scheduler, make_step
 from networks.losses import binary_cross_entropy, focal_loss, lsep_loss_stable
@@ -368,9 +369,10 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
             return metric
 
     def validation(self, valid_loader, epoch):
-        return self.evaluate(
+        result = self.evaluate(
             valid_loader,
             verbose=True, write_summary=True, epoch=epoch)
+        return result
 
     def predict(self, loader):
 
@@ -439,6 +441,16 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 train_loader, epoch,
                 log_interval, write_summary=True
             )
+
+            if epoch == epochs - 1:
+                self.optimizer.swap_swa_sgd()
+
+                def swa_loader():
+                    for batch in train_loader:
+                        yield batch["signal"]
+
+                self.optimizer.bn_update(swa_loader(), self, device=self.device)
+
             validation_score = self.validation(valid_loader, epoch)
             scores.append(validation_score)
 
@@ -474,7 +486,7 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
             self.config.train.learning_rate,
             weight_decay=self.config.train.weight_decay
         )
-        self.optimizer = optimizer
+        self.optimizer = SWA(optimizer, swa_start=int(0.8 * max_steps), swa_freq=100)
         self.scheduler = make_scheduler(
             self.config.train.scheduler, max_steps=max_steps)(optimizer)
 
