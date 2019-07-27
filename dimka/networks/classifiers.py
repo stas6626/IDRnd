@@ -289,7 +289,8 @@ class TwoDimensionalCNNClassificationModel(nn.Module):
                 labels = take_first_column(labels)
 
                 probs = torch.sigmoid(class_logits).data.cpu().numpy()
-                labels = labels.data.cpu().numpy()
+                # do thresholding to support soft targets
+                labels = (labels.data.cpu().numpy() > 0.5).astype(np.float32)
 
                 metric = compute_inverse_eer(labels, probs)
                 history.append(metric)
