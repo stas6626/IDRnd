@@ -58,6 +58,41 @@ class ResnetBlock2d(nn.Module):
 
 
 
+class ResnetBlock1d(nn.Module):
+
+    def __init__(self, depth):
+        super().__init__()
+
+        self.conv1 = nn.Conv1d(depth, depth, kernel_size=1)
+        self.bn1 = nn.BatchNorm1d(depth)
+        self.conv2 = nn.Conv1d(depth, depth, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm1d(depth)
+        self.conv3 = nn.Conv1d(depth, depth, kernel_size=1)
+        self.bn3 = nn.BatchNorm1d(depth)
+        self.rrelu1 = nn.RReLU(depth)
+        self.rrelu2 = nn.RReLU(depth)
+        self.rrelu3 = nn.RReLU(depth)
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.rrelu1(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = self.rrelu2(out)
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        out += identity
+        out = self.rrelu3(out)
+
+        return out
+
+
 class TwoDimensionalCNNClassificationModel(nn.Module):
 
     def __init__(self, experiment, device="cuda"):
@@ -507,7 +542,7 @@ class HierarchicalCNNClassificationModel(nn.Module):
                 nn.MaxPool1d(kernel_size=2, stride=2),
                 nn.BatchNorm1d(depth),
                 nn.PReLU(depth),
-                ResnetBlock(depth)
+                ResnetBlock1d(depth)
             ])
 
             self.conv_modules.append(nn.Sequential(*modules))
