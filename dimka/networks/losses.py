@@ -34,3 +34,25 @@ def lsep_loss(input, target, average=True):
         return lsep.mean()
     else:
         return lsep
+
+
+def lsep_loss_stable(input, target, average=True):
+
+    n = input.size(0)
+
+    differences = input.unsqueeze(1) - input.unsqueeze(2)
+    where_lower = (target.unsqueeze(1) < target.unsqueeze(2)).float()
+
+    differences = differences.view(n, -1)
+    where_lower = where_lower.view(n, -1)
+
+    max_difference, index = torch.max(differences, dim=1, keepdim=True)
+    differences = differences - max_difference
+    exps = differences.exp() * where_lower
+
+    lsep = max_difference + torch.log(torch.exp(-max_difference) + exps.sum(-1))
+
+    if average:
+        return lsep.mean()
+    else:
+        return lsep
