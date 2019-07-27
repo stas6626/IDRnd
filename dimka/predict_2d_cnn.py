@@ -48,7 +48,7 @@ parser.add_argument(
     help="batch size used for prediction"
 )
 parser.add_argument(
-    "--threshold", type=int, default=0.5,
+    "--threshold", type=int,
     help="threshold used for prediction"
 )
 parser.add_argument(
@@ -109,5 +109,8 @@ with Experiment(resume_from=args.experiment) as experiment:
 
 test_predictions = np.mean(all_predictions, 0)
 
-test_df["labels"] = (test_predictions > args.threshold).astype(np.int32)
+if args.threshold is not None:
+    test_predictions = (test_predictions > args.threshold).astype(np.int32)
+
+test_df["labels"] = test_predictions
 test_df.to_csv(args.output_df, index=False)
