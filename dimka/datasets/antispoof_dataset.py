@@ -30,7 +30,7 @@ class AntispoofDataset(data.Dataset):
 
         if self.labels is not None:
             label = self.labels[index]
-            labels = np.array([1.0, 0.0]) if label == 1 else np.array([0.0, 1.0])
+            labels = np.array([label, 1 - label], dtype=np.float32)
             sample["labels"] = labels
 
         if self.transform is not None:
