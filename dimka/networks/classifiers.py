@@ -652,7 +652,7 @@ class HierarchicalCNNClassificationModel(nn.Module):
                 class_logits = outputs["class_logits"].squeeze(-1)
 
                 loss = (
-                    lsep_loss_stable(
+                    focal_loss(
                         class_logits,
                         labels,
                     )
@@ -710,7 +710,7 @@ class HierarchicalCNNClassificationModel(nn.Module):
                 class_logits = outputs["class_logits"].squeeze(-1)
 
                 loss = (
-                    lsep_loss_stable(
+                    focal_loss(
                         class_logits,
                         labels,
                     )
